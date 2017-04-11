@@ -89,7 +89,7 @@ namespace MessageSystemCSDesktopApp
 
                         foreach (LocalClientData item in lb_clients.Items)
                         {
-                            if(packetDataUID == p.singleStringData && packetDataPublicKey == p.singleStringData)
+                            if(packetDataUID == item.uid && packetDataPublicKey == item.publicKey)
                             {
                                 lb_clients.Items.Remove(item);
                                 break;
@@ -166,6 +166,14 @@ namespace MessageSystemCSDesktopApp
         public void GetClientist()
         {
             SendDataToServer(new Packet(Packet.PacketType.GetClientList));
+        }
+
+        private void lb_clients_DoubleClick(object sender, EventArgs e)
+        {
+            if (lb_clients.SelectedItem != null)
+            {
+                tc_conversations.TabPages.Add(new ConversationTabPage(((LocalClientData)lb_clients.SelectedItem).uid, ((LocalClientData)lb_clients.SelectedItem).publicKey));
+            }
         }
     }
 }

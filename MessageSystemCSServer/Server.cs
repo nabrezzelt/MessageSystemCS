@@ -12,7 +12,6 @@ namespace MessageSystemCSServer
 {
     class Server
     {
-
         const int PORT = 6666;
         private static Socket listenerSocket;
         private static List<ClientData> clients;
@@ -85,10 +84,11 @@ namespace MessageSystemCSServer
                         clients.Remove(client);
                         Console.WriteLine("Client removed from list.\n");
 
-                        //NOtify other Clients that client has disconnected.
+                        //Notify other Clients that client has disconnected.
                         foreach (ClientData c in clients)
                         {
-                            c.SendDataPacketToClient(new Packet(Packet.PacketType.ClientDisconnected, c.uid + ";" + c.publicKey));
+                            c.SendDataPacketToClient(new Packet(Packet.PacketType.ClientDisconnected, client.uid + ";" + client.publicKey));
+                            Console.WriteLine(c.uid + " notified that " + client.uid + " has disconnected");
                         }
                     }
 

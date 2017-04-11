@@ -38,6 +38,7 @@
             this.tb_ip = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btn_send = new System.Windows.Forms.Button();
+            this.tc_conversations = new System.Windows.Forms.TabControl();
             this.SuspendLayout();
             // 
             // btn_connect
@@ -83,21 +84,22 @@
             this.lb_clients.Name = "lb_clients";
             this.lb_clients.Size = new System.Drawing.Size(145, 186);
             this.lb_clients.TabIndex = 5;
+            this.lb_clients.DoubleClick += new System.EventHandler(this.lb_clients_DoubleClick);
             // 
             // tb_send_messages
             // 
-            this.tb_send_messages.Location = new System.Drawing.Point(12, 460);
+            this.tb_send_messages.Location = new System.Drawing.Point(439, 266);
             this.tb_send_messages.Name = "tb_send_messages";
-            this.tb_send_messages.Size = new System.Drawing.Size(368, 67);
+            this.tb_send_messages.Size = new System.Drawing.Size(49, 42);
             this.tb_send_messages.TabIndex = 6;
             this.tb_send_messages.Text = "";
             // 
             // tb_received_messages
             // 
-            this.tb_received_messages.Location = new System.Drawing.Point(12, 58);
+            this.tb_received_messages.Location = new System.Drawing.Point(386, 76);
             this.tb_received_messages.Name = "tb_received_messages";
             this.tb_received_messages.ReadOnly = true;
-            this.tb_received_messages.Size = new System.Drawing.Size(368, 396);
+            this.tb_received_messages.Size = new System.Drawing.Size(145, 247);
             this.tb_received_messages.TabIndex = 7;
             this.tb_received_messages.Text = "";
             // 
@@ -120,18 +122,27 @@
             // 
             // btn_send
             // 
-            this.btn_send.Location = new System.Drawing.Point(305, 533);
+            this.btn_send.Location = new System.Drawing.Point(439, 266);
             this.btn_send.Name = "btn_send";
             this.btn_send.Size = new System.Drawing.Size(75, 23);
             this.btn_send.TabIndex = 10;
             this.btn_send.Text = "Send";
             this.btn_send.UseVisualStyleBackColor = true;
             // 
+            // tc_conversations
+            // 
+            this.tc_conversations.Location = new System.Drawing.Point(12, 58);
+            this.tc_conversations.Name = "tc_conversations";
+            this.tc_conversations.SelectedIndex = 0;
+            this.tc_conversations.Size = new System.Drawing.Size(368, 498);
+            this.tc_conversations.TabIndex = 11;
+            // 
             // frm_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(543, 568);
+            this.Controls.Add(this.tc_conversations);
             this.Controls.Add(this.btn_send);
             this.Controls.Add(this.tb_ip);
             this.Controls.Add(this.label3);
@@ -162,6 +173,7 @@
         private System.Windows.Forms.TextBox tb_ip;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btn_send;
+        private System.Windows.Forms.TabControl tc_conversations;
     }
 }
 
