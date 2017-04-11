@@ -1,0 +1,11 @@
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\bin\Debug\MessageSystemCSDesktopApp.exe.config
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\bin\Debug\MessageSystemCSDesktopApp.exe
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\bin\Debug\MessageSystemCSDesktopApp.pdb
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\bin\Debug\MessageSysDataManagementLib.dll
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\bin\Debug\MessageSysDataManagementLib.pdb
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\obj\Debug\MessageSystemCSDesktopApp.csprojResolveAssemblyReference.cache
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\obj\Debug\MessageSystemCSDesktopApp.frm_main.resources
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\obj\Debug\MessageSystemCSDesktopApp.Properties.Resources.resources
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\obj\Debug\MessageSystemCSDesktopApp.csproj.GenerateResource.Cache
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\obj\Debug\MessageSystemCSDesktopApp.exe
+C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSDesktopApp\obj\Debug\MessageSystemCSDesktopApp.pdb
