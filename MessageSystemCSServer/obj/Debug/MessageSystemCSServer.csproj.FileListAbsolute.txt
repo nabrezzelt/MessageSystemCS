@@ -1,8 +1,0 @@
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\bin\Debug\MessageSystemCSServer.exe
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\bin\Debug\MessageSysDataManagementLib.dll
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\bin\Debug\MessageSysDataManagementLib.pdb
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\obj\Debug\MessageSystemCSServer.csprojResolveAssemblyReference.cache
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\obj\Debug\MessageSystemCSServer.exe
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\obj\Debug\MessageSystemCSServer.pdb
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\bin\Debug\MessageSystemCSServer.exe.config
-C:\Users\Nabrezzelt\Desktop\MessageSystemCS\MessageSystemCSServer\bin\Debug\MessageSystemCSServer.pdb
