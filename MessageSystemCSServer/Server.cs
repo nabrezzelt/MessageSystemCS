@@ -134,6 +134,15 @@ namespace MessageSystemCSServer
                     client.SendDataPacketToClient(new Packet(Packet.PacketType.ClientList, dataList));
                     break;
                 case Packet.PacketType.Message:
+                    Console.WriteLine("Incomming Message from " + p.uid + " to " + p.destinationUID + " data: " + Encoding.UTF8.GetString(p.messageData));
+                    foreach (ClientData c in clients)
+                    {
+                        if(c.uid == p.destinationUID)
+                        {
+                            c.SendDataPacketToClient(new Packet(Packet.PacketType.Message, p.messageTimeStamp, p.uid, p.destinationUID, p.messageData));
+                            Console.WriteLine("Message send to " + c.uid);
+                        }
+                    }
                     break;
             }
         }

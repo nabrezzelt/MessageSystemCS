@@ -9,8 +9,9 @@ namespace MessageSystemCSDesktopApp
 {
     class ConversationTabPage : TabPage
     {
-        private string uid;
-        private string publicKey;
+        private string _uid;
+        private string _publicKey;
+        private frm_main main;
 
         //Controls
         private Button btn_send;
@@ -19,10 +20,14 @@ namespace MessageSystemCSDesktopApp
         private RichTextBox tb_receive_message;
         private Panel panelReceive;
 
-        public ConversationTabPage(string uid, string publicKey)
+        public string PublicKey { get => _publicKey; set => _publicKey = value; }
+        public string UID { get => _uid; set => _uid = value; }
+
+        public ConversationTabPage(frm_main main, string uid, string publicKey)
         {
-            this.publicKey = publicKey;
-            this.uid = uid;
+            this.main = main;
+            _publicKey = publicKey;
+            _uid = uid;
 
             InitializeComponent();            
         }
@@ -91,8 +96,8 @@ namespace MessageSystemCSDesktopApp
             this.ClientSize = new System.Drawing.Size(344, 433);
             this.Controls.Add(this.panelReceive);
             this.Controls.Add(this.panelSend);
-            this.Name = uid;
-            this.Text = uid;
+            this.Name = _uid;
+            this.Text = _uid;
             this.panelSend.ResumeLayout(false);
             this.panelReceive.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -101,12 +106,21 @@ namespace MessageSystemCSDesktopApp
 
         private void tb_send_message_KeyDown(object sender, KeyEventArgs e)
         {
-            throw new NotImplementedException();
+            if(e.KeyCode == Keys.Enter && e.Shift)
+            {
+                main.Log("Shift + Enter pressed.");
+            }
+            else if(e.KeyCode == Keys.Enter)
+            {
+                main.Log("Only Enter pressed.");
+                btn_send.PerformClick();
+                main.Log("Message sent.");
+            }
         }
 
         private void btn_send_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text));
         }
     }
 }

@@ -30,7 +30,7 @@ namespace MessageSysDataManagementLib
         /// <param name="publicKey">PublicKey</param>
         /// <param name="message">Messagedata</param>
         /// <returns>Encrypted Message as Byte-Array</returns>
-        private static byte[] Encrypt(string publicKey, string message)
+        public static byte[] Encrypt(string publicKey, string message)
         {
             CspParameters cspParams = new CspParameters { ProviderType = 1 };
             RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider(cspParams);
@@ -48,7 +48,7 @@ namespace MessageSysDataManagementLib
         /// <param name="privateKey"></param>
         /// <param name="encryptedMessage"></param>
         /// <returns></returns>
-        private static string Decrypt(string privateKey, byte[] encryptedMessage)
+        public static string Decrypt(string privateKey, byte[] encryptedMessage)
         {
             CspParameters cspParams = new CspParameters { ProviderType = 1 };
             RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider(cspParams);

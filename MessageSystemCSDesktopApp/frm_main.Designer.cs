@@ -37,7 +37,6 @@
             this.tb_received_messages = new System.Windows.Forms.RichTextBox();
             this.tb_ip = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.btn_send = new System.Windows.Forms.Button();
             this.tc_conversations = new System.Windows.Forms.TabControl();
             this.SuspendLayout();
             // 
@@ -120,15 +119,6 @@
             this.label3.TabIndex = 8;
             this.label3.Text = "IP:";
             // 
-            // btn_send
-            // 
-            this.btn_send.Location = new System.Drawing.Point(439, 266);
-            this.btn_send.Name = "btn_send";
-            this.btn_send.Size = new System.Drawing.Size(75, 23);
-            this.btn_send.TabIndex = 10;
-            this.btn_send.Text = "Send";
-            this.btn_send.UseVisualStyleBackColor = true;
-            // 
             // tc_conversations
             // 
             this.tc_conversations.Location = new System.Drawing.Point(12, 58);
@@ -143,7 +133,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(543, 568);
             this.Controls.Add(this.tc_conversations);
-            this.Controls.Add(this.btn_send);
             this.Controls.Add(this.tb_ip);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.tb_received_messages);
@@ -172,7 +161,6 @@
         private System.Windows.Forms.RichTextBox tb_received_messages;
         private System.Windows.Forms.TextBox tb_ip;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button btn_send;
         private System.Windows.Forms.TabControl tc_conversations;
     }
 }

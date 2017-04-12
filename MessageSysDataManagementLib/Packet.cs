@@ -18,6 +18,7 @@ namespace MessageSysDataManagementLib
         public string publicKey;
         public string singleStringData;
         public byte[] messageData;
+        public DateTime messageTimeStamp;
         public List<object> data;
 
         public Packet(PacketType type)
@@ -45,6 +46,14 @@ namespace MessageSysDataManagementLib
             this.publicKey = publicKey;
         }      
 
+        public Packet(PacketType type, DateTime messageTimeStamp, string uid, string destinationUID, byte[] messageData)
+        {
+            this.type = type;
+            this.uid = uid;
+            this.destinationUID = destinationUID;
+            this.messageData = messageData;
+        }
+
         /// <summary>
         /// Deserialisiert den gegebenen ByteArray in ein Packet-Objekt (von JSON zurück zu einem Objekt).
         /// </summary>
@@ -62,6 +71,7 @@ namespace MessageSysDataManagementLib
             uid = p.uid;
             destinationUID = p.destinationUID;
             publicKey = p.publicKey;
+            messageData = p.messageData;
             data = p.data;
             singleStringData = p.singleStringData;
         }

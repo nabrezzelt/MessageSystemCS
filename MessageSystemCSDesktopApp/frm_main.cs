@@ -87,6 +87,14 @@ namespace MessageSystemCSDesktopApp
                         string packetDataUID = data[0];
                         string packetDataPublicKey = data[1];
 
+                        foreach (ConversationTabPage conversation in tc_conversations.TabPages)
+                        {
+                            if(conversation.UID == packetDataUID && conversation.PublicKey == packetDataPublicKey)
+                            {
+                                tc_conversations.TabPages.Remove(conversation);
+                            }
+                        }
+
                         foreach (LocalClientData item in lb_clients.Items)
                         {
                             if(packetDataUID == item.uid && packetDataPublicKey == item.publicKey)
@@ -95,9 +103,11 @@ namespace MessageSystemCSDesktopApp
                                 break;
                             }
                         }
+                        
                     });
                     break;
                 case Packet.PacketType.Message:
+                    Log("Incomming Message from "+ p.uid);
                     break;
             }
         }
@@ -172,8 +182,29 @@ namespace MessageSystemCSDesktopApp
         {
             if (lb_clients.SelectedItem != null)
             {
-                tc_conversations.TabPages.Add(new ConversationTabPage(((LocalClientData)lb_clients.SelectedItem).uid, ((LocalClientData)lb_clients.SelectedItem).publicKey));
+                foreach (ConversationTabPage conversation  in tc_conversations.TabPages)
+                {
+                    if(conversation.UID == ((LocalClientData)lb_clients.SelectedItem).uid && conversation.PublicKey == ((LocalClientData)lb_clients.SelectedItem).publicKey)
+                    {
+                        tb_received_messages.Text += ">> Conversation already exists.\n";
+                        tc_conversations.SelectedTab = conversation;
+                        return;
+                    }
+                }
+
+                tc_conversations.TabPages.Add(new ConversationTabPage(this, ((LocalClientData)lb_clients.SelectedItem).uid, ((LocalClientData)lb_clients.SelectedItem).publicKey));
+                tc_conversations.SelectedTab = tc_conversations.TabPages[tc_conversations.TabPages.Count-1];
             }
+        }
+
+        public void Log(string message)
+        {
+            InvokeGUIThread(() => { tb_received_messages.Text += ">> " + message + "\n"; });
+        }       
+        
+        public void SendMessage(string destinationID, byte[] encrypedMessage)
+        {
+            SendDataToServer(new Packet(Packet.PacketType.Message, DateTime.Now, uid, destinationID, encrypedMessage));
         }
     }
 }
