@@ -122,5 +122,34 @@ namespace MessageSystemCSDesktopApp
         {
             main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text));
         }
+
+        public void DisableAll(string message)
+        {
+            btn_send.Enabled = false;
+            tb_receive_message.Enabled = false;
+            tb_send_message.Enabled = false;
+
+            if(message != "")
+            {
+                ShowSystemMessage(message);
+            }
+        }
+
+        public void EnableAll(string message = "")
+        {
+            btn_send.Enabled = true;
+            tb_receive_message.Enabled = true;
+            tb_send_message.Enabled = true;
+
+            if (message != "")
+            {
+                ShowSystemMessage(message);
+            }
+        }
+
+        private void ShowSystemMessage(string message)
+        {
+            tb_receive_message.Text += message + "\n";
+        }
     }
 }

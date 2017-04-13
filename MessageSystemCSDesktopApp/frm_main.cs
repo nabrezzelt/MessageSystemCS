@@ -91,7 +91,8 @@ namespace MessageSystemCSDesktopApp
                         {
                             if(conversation.UID == packetDataUID && conversation.PublicKey == packetDataPublicKey)
                             {
-                                tc_conversations.TabPages.Remove(conversation);
+                                //tc_conversations.TabPages.Remove(conversation);
+                                conversation.DisableAll("Client disconnected");
                             }
                         }
 
