@@ -12,6 +12,7 @@ namespace MessageSystemCSDesktopApp
         private string _uid;
         private string _publicKey;
         private frm_main main;
+        private bool _disabled = false;
 
         //Controls
         private Button btn_send;
@@ -22,6 +23,7 @@ namespace MessageSystemCSDesktopApp
 
         public string PublicKey { get => _publicKey; set => _publicKey = value; }
         public string UID { get => _uid; set => _uid = value; }
+        public bool Disabled { get => _disabled; set => _disabled = value; }
 
         public ConversationTabPage(frm_main main, string uid, string publicKey)
         {
@@ -80,6 +82,7 @@ namespace MessageSystemCSDesktopApp
             this.tb_send_message.Size = new System.Drawing.Size(320, 75);
             this.tb_send_message.TabIndex = 2;
             this.tb_send_message.Text = "";
+            this.tb_send_message.MaxLength = 550;
             this.tb_send_message.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tb_send_message_KeyDown);
             // 
             // panelReceive
@@ -106,11 +109,12 @@ namespace MessageSystemCSDesktopApp
 
         private void tb_send_message_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.KeyCode == Keys.Enter && e.Shift)
-            {
-                main.Log("Shift + Enter pressed.");
-            }
-            else if(e.KeyCode == Keys.Enter)
+            //if(e.KeyCode == Keys.Enter && e.Shift)
+            //{
+            //    main.Log("Shift + Enter pressed.");
+            //}
+            //else 
+            if (e.KeyCode == Keys.Enter && !e.Shift)
             {
                 main.Log("Only Enter pressed.");
                 btn_send.PerformClick();
@@ -121,6 +125,8 @@ namespace MessageSystemCSDesktopApp
         private void btn_send_Click(object sender, EventArgs e)
         {
             main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text));
+            NewMessageFromMe(DateTime.Now, tb_send_message.Text);
+            tb_send_message.Clear();
         }
 
         public void DisableAll(string message)
@@ -133,6 +139,8 @@ namespace MessageSystemCSDesktopApp
             {
                 ShowSystemMessage(message);
             }
+
+            _disabled = true;
         }
 
         public void EnableAll(string message = "")
@@ -150,6 +158,16 @@ namespace MessageSystemCSDesktopApp
         private void ShowSystemMessage(string message)
         {
             tb_receive_message.Text += message + "\n";
+        }
+
+        public void NewMessageFromMe(DateTime messageTimeStamp, string message)
+        {
+            tb_receive_message.Text += messageTimeStamp.ToString("hh:mm:ss") + " - Du: " + message + "\n";           
+        }
+
+        public void NewMessageFromOther(string otherUID, DateTime messageTimeStamp, string message)
+        {
+            tb_receive_message.Text += messageTimeStamp.ToString("hh:mm:ss") + " - " + otherUID + ": " + message + "\n";
         }
     }
 }

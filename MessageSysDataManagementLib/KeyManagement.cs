@@ -16,7 +16,7 @@ namespace MessageSysDataManagementLib
         public static Tuple<string, string> CreateKeyPair()
         {
             CspParameters cspParams = new CspParameters { ProviderType = 1 };
-            RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider(1024, cspParams);
+            RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider(4096, cspParams);
 
             string publicKey = Convert.ToBase64String(rsaProvider.ExportCspBlob(false));
             string privateKey = Convert.ToBase64String(rsaProvider.ExportCspBlob(true));

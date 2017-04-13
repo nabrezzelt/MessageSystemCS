@@ -74,7 +74,6 @@
             this.tb_uid.Name = "tb_uid";
             this.tb_uid.Size = new System.Drawing.Size(100, 20);
             this.tb_uid.TabIndex = 4;
-            this.tb_uid.Text = "Nabrezzelt";
             // 
             // lb_clients
             // 
@@ -126,6 +125,8 @@
             this.tc_conversations.SelectedIndex = 0;
             this.tc_conversations.Size = new System.Drawing.Size(368, 498);
             this.tc_conversations.TabIndex = 11;
+            this.tc_conversations.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tc_conversations_DrawItem);
+            this.tc_conversations.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tc_conversations_MouseDown);
             // 
             // frm_main
             // 

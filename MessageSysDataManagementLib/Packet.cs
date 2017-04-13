@@ -49,9 +49,11 @@ namespace MessageSysDataManagementLib
         public Packet(PacketType type, DateTime messageTimeStamp, string uid, string destinationUID, byte[] messageData)
         {
             this.type = type;
+            this.messageTimeStamp = messageTimeStamp;
             this.uid = uid;
             this.destinationUID = destinationUID;
             this.messageData = messageData;
+            
         }
 
         /// <summary>
@@ -74,6 +76,7 @@ namespace MessageSysDataManagementLib
             messageData = p.messageData;
             data = p.data;
             singleStringData = p.singleStringData;
+            messageTimeStamp = p.messageTimeStamp;
         }
 
         /// <summary>
