@@ -1,5 +1,5 @@
 # MessageSystemCS
-MessageSystemCS is a secure chat application written in C# and based on the RSA-key-cryphtography.
+MessageSystemCS is a secure chat application written in C# and based on the RSA-key-cryptography.
 
 In the Middle of the application is a Server and every client connects to it.
 
