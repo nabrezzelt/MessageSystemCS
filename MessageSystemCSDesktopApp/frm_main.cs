@@ -12,13 +12,15 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace MessageSystemCSDesktopApp
 {
     public partial class frm_main : Form
     {
         const int PORT = 6666;
-        private Socket serverSocket;
+        private TcpClient tcpClient;
+        private NetworkStream clientStream;
         private string uid;
         private string publicKey;
         private string privateKey;
@@ -50,35 +52,40 @@ namespace MessageSystemCSDesktopApp
             Properties.Settings.Default.ServerIP = tb_ip.Text;
             Properties.Settings.Default.Save();
 
-            //Register            
-            SendDataToServer(new Packet(Packet.PacketType.Registration, uid, publicKey));
-            InvokeGUIThread(() => { tb_received_messages.Text += ">> Registration-Packet sent.\n"; });
-
             //Starte Thread zum Empfangen von Daten
             Thread receiveDataThread = new Thread(DataIn);
             receiveDataThread.Start();
+
+            //Register            
+            SendDataToServer(new Packet(Packet.PacketType.Registration, uid, publicKey));
+            InvokeGUIThread(() => { tb_log.Text += ">> Registration-Packet sent.\n"; });            
 
             btn_connect.Enabled = false;
         }
 
         public void SendDataToServer(Packet packet)
         {
-            serverSocket.Send(packet.ConvertToBytes());
+            byte[] packetBytes = packet.ConvertToBytes();
+
+            var length = packetBytes.Length;
+            var lengthBytes = BitConverter.GetBytes(length);
+            clientStream.Write(lengthBytes, 0, 4); //Senden der Länge/Größe des Textes
+            clientStream.Write(packetBytes, 0, packetBytes.Length); //Senden der eingentlichen Daten/des Textes    
         }
 
-        private void DataManagerForIncommingServerPackets(Packet p)
+        private void DataManagerForIncommingServerPackets(Packet packet)
         {
-            switch (p.type)
+            switch (packet.type)
             {               
                 case Packet.PacketType.RegistrationSuccess:
-                    InvokeGUIThread(() => { tb_received_messages.Text += ">> Registration was successfull.\n"; });
+                    InvokeGUIThread(() => { tb_log.Text += ">> Registration was successfull.\n"; });
                     GetClientist();
                     break;
                 case Packet.PacketType.ClientList:
                     InvokeGUIThread(() => {
-                        tb_received_messages.Text += ">> ClientList received.\n";
+                        tb_log.Text += ">> ClientList received.\n";
 
-                        foreach (object clientdata in p.data)
+                        foreach (object clientdata in packet.data)
                         {
                             string[] data = ((string) clientdata).Split(';');
                             lb_clients.Items.Add(new LocalClientData(data[0], data[1]));
@@ -87,16 +94,16 @@ namespace MessageSystemCSDesktopApp
                     break;
                 case Packet.PacketType.ClientConnected:
                     InvokeGUIThread(() => {
-                        tb_received_messages.Text += ">> New Client connected.\n";
+                        tb_log.Text += ">> New Client connected.\n";
                         
-                        string[] data = ((string)p.singleStringData).Split(';');
-                        lb_clients.Items.Add(new LocalClientData(data[0], data[1]));                       
+                        string[] data = ((string)packet.singleStringData).Split(';');
+                        lb_clients.Items.Add(new LocalClientData(data[0], data[1]));                        
                     });
                     break;
                 case Packet.PacketType.ClientDisconnected:
                     InvokeGUIThread(() => {
 
-                        string[] data = (p.singleStringData).Split(';');
+                        string[] data = (packet.singleStringData).Split(';');
                         string packetDataUID = data[0];
                         string packetDataPublicKey = data[1];
 
@@ -121,17 +128,17 @@ namespace MessageSystemCSDesktopApp
                     });
                     break;
                 case Packet.PacketType.Message:
-                    Log("Incomming Message from " + p.uid);
+                    Log("Incomming Message from " + packet.uid);
                     InvokeGUIThread(() => {
                         foreach (ConversationTabPage conversation in tc_conversations.TabPages)
                         {
-                            if (p.uid == conversation.UID)
+                            if (packet.uid == conversation.UID)
                             {
                                 if(conversation.Disabled)
                                 {
                                     conversation.EnableAll("Client reconnected");
                                 }                               
-                                conversation.NewMessageFromOther(conversation.UID, p.messageTimeStamp, KeyManagement.Decrypt(privateKey, p.messageData));                                
+                                conversation.NewMessageFromOther(conversation.UID, packet.messageTimeStamp, KeyManagement.Decrypt(privateKey, packet.messageData));                                
                                 return;
                             }
                         }
@@ -139,15 +146,15 @@ namespace MessageSystemCSDesktopApp
                         string publicKey = "";
                         foreach (LocalClientData c in lb_clients.Items)
                         {
-                            if(c.uid == p.uid)
+                            if(c.uid == packet.uid)
                             {
                                 publicKey = c.publicKey;
                             }
                         }
 
                         //Noch keine Conversation offen -> neue öffnen
-                        tc_conversations.TabPages.Add(new ConversationTabPage(this, p.uid, publicKey));
-                        ((ConversationTabPage)tc_conversations.TabPages[tc_conversations.TabPages.Count - 1]).NewMessageFromOther(p.uid, p.messageTimeStamp, KeyManagement.Decrypt(privateKey, p.messageData));
+                        tc_conversations.TabPages.Add(new ConversationTabPage(this, packet.uid, publicKey));
+                        ((ConversationTabPage)tc_conversations.TabPages[tc_conversations.TabPages.Count - 1]).NewMessageFromOther(packet.uid, packet.messageTimeStamp, KeyManagement.Decrypt(privateKey, packet.messageData));
                     });
                     
                     break;
@@ -156,53 +163,64 @@ namespace MessageSystemCSDesktopApp
 
         private void ConnectToServer(string ip, int port)
         {
-            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            tcpClient = new TcpClient();
 
-            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-
-            while (!serverSocket.Connected)
+            while (!tcpClient.Connected)
             {
                 try
                 {
-                    InvokeGUIThread(() => { tb_received_messages.Text += ">> Trying to connect at " + ip + " on port " + port + "...\n"; });
-                    serverSocket.Connect(serverEndPoint);                    
-                    InvokeGUIThread(() => { tb_received_messages.Text += ">> Connected\n"; });
-
+                    InvokeGUIThread(() => { tb_log.Text += ">> Trying to connect at " + ip + " on port " + port + "...\n"; });
+                    tcpClient.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
+                    clientStream = tcpClient.GetStream();
+                    InvokeGUIThread(() => { tb_log.Text += ">> Connected\n"; });
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
-                    Thread.Sleep(1000);
+                    Console.WriteLine("Message: " + ex.Message);
                 }
-            }
-
+            }           
         }
 
         private void DataIn()
-        {
-            byte[] buffer;
-            int readBytes;
-
-            while (true)
+        {            
+            try
             {
-                try
+                while (true)
                 {
-                    buffer = new byte[16000000]; //ca 16MB
-                    readBytes = serverSocket.Receive(buffer);
+                    byte[] buffer; //Daten
+                    byte[] dataSize = new byte[4]; //Länge
 
-                    if (readBytes > 0)
+                    int readBytes = clientStream.Read(dataSize, 0, 4);
+
+                    while (readBytes != 4)
                     {
-                        DataManagerForIncommingServerPackets(new Packet(buffer));
+                        readBytes += clientStream.Read(dataSize, readBytes, 4 - readBytes);
                     }
-                }
-                catch (SocketException)
-                {
-                    MessageBox.Show("The server has disconnected!");
-                    serverSocket.Dispose();
-                    Console.ReadLine();
-                    Environment.Exit(0);
+                    var contentLength = BitConverter.ToInt32(dataSize, 0);
+
+                    buffer = new byte[contentLength];
+                    readBytes = 0;
+                    while (readBytes != buffer.Length)
+                    {
+                        readBytes += clientStream.Read(buffer, readBytes, buffer.Length - readBytes);
+                    }
+
+                    //Daten sind im Buffer-Array gespeichert
+                    DataManagerForIncommingServerPackets(new Packet(buffer));
                 }
             }
+            catch (SocketException ex)
+            {
+                Console.WriteLine("No: " + ex.ErrorCode + " Message: " + ex.Message);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("Server disconnected!");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
+
         }
 
         private void InvokeGUIThread(Action action)
@@ -228,7 +246,7 @@ namespace MessageSystemCSDesktopApp
                 {
                     if(conversation.UID == ((LocalClientData)lb_clients.SelectedItem).uid && conversation.PublicKey == ((LocalClientData)lb_clients.SelectedItem).publicKey)
                     {
-                        tb_received_messages.Text += ">> Conversation already exists.\n";
+                        tb_log.Text += ">> Conversation already exists.\n";
                         tc_conversations.SelectedTab = conversation;
                         return;
                     }
@@ -241,7 +259,7 @@ namespace MessageSystemCSDesktopApp
 
         public void Log(string message)
         {
-            InvokeGUIThread(() => { tb_received_messages.Text += ">> " + message + "\n"; });
+            InvokeGUIThread(() => { tb_log.Text += ">> " + message + "\n"; });
         }       
         
         public void SendMessage(string destinationID, byte[] encrypedMessage)
@@ -275,7 +293,6 @@ namespace MessageSystemCSDesktopApp
                 }
             }
         }
-
         //[DllImport("user32.dll")]
         //private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
         //private const int TCM_SETMINTABWIDTH = 0x1300 + 49;

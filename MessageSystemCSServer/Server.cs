@@ -7,18 +7,22 @@ using System.Net;
 using System.Net.Sockets;
 using MessageSysDataManagementLib;
 using System.Threading;
+using System.IO;
 
 namespace MessageSystemCSServer
 {
     class Server
     {
         const int PORT = 6666;
-        private static Socket listenerSocket;
-        private static List<ClientData> clients;
+        private static TcpListener listener;
+        private static List<ClientData> clients = new List<ClientData>();
 
         static void Main(string[] args)
         {
             clients = new List<ClientData>();
+
+            Console.Title = "MessageSystemCS | Server";
+
             StartServer();
         }
 
@@ -26,79 +30,79 @@ namespace MessageSystemCSServer
         {
             Console.WriteLine("Starting server on " + Packet.GetThisIPv4Adress());
 
-            listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse(Packet.GetThisIPv4Adress()), PORT); //Erstelle einen Endpunkt auf den sich die Clients verbinden können
-
-            listenerSocket.Bind(localEndPoint);
+            listener = new TcpListener(new IPEndPoint(IPAddress.Parse(Packet.GetThisIPv4Adress()), PORT));
 
             Console.WriteLine("Server started. Waiting for new Client connections...\n");
 
-            Thread listenForNewClients = new Thread(ListenForClients);
+            Thread listenForNewClients = new Thread(ListenForNewClients);
             listenForNewClients.Start();
         }
 
-        private static void ListenForClients()
+        private static void ListenForNewClients()
         {
+            listener.Start();
+
             while (true)
             {
-                listenerSocket.Listen(0);
-
                 //Sobald ein Client sich verbinden will ClientData erstellen und in ClientListe schieben
-                clients.Add(new ClientData(listenerSocket.Accept()));
-                Console.WriteLine("New Client connected to the server.");
-            }
+                clients.Add(new ClientData(listener.AcceptTcpClient()));
+                Console.WriteLine("New Client connected");
+            }            
         }
 
-        public static void DataIn(object cSocket)          //clientData)
+        public static void DataIn(object tcpClient)          //clientData)
         {
-            //Socket clientSocket = ((ClientData) clientData).clientSocket;
-            //string uid = ((ClientData)clientData).uid;
-
-            Socket clientSocket = (Socket)cSocket;
-
-            byte[] buffer;
-            int readBytes;
-
-            while (true)
+            TcpClient client = (TcpClient)tcpClient;
+            NetworkStream clientStream = client.GetStream();
+            try
             {
-                try
+                while (true)
                 {
-                    buffer = new byte[16000000]; //ca. 16MB
-                    readBytes = clientSocket.Receive(buffer);
+                    byte[] buffer; //Daten
+                    byte[] dataSize = new byte[4]; //Länge
 
-                    if (readBytes > 0)
+                    int readBytes = clientStream.Read(dataSize, 0, 4);
+
+                    while (readBytes != 4)
                     {
-                        //Verarbeite erhaltene Daten(byte[]) und gebe diese als Packet an den DatenManager weiter
-                        Packet p = new Packet(buffer); //Konstruktor von "Packet" kann einen byte[] annehmen und erstellt daraus ein passendes Paket
-                        DataManagerForIncommingClientData(p, clientSocket);
+                        readBytes += clientStream.Read(dataSize, readBytes, 4 - readBytes);
                     }
-                }
-                catch (SocketException ex)
-                {
-                    Console.WriteLine("[" + ex.ErrorCode + "] " + ex.Message);
+                    var contentLength = BitConverter.ToInt32(dataSize, 0);
 
-                    if (ex.ErrorCode == 10054)
+                    buffer = new byte[contentLength];
+                    readBytes = 0;
+                    while (readBytes != buffer.Length)
                     {
-                        ClientData client = GetClientFromList(clientSocket);
-                        Console.WriteLine("Client disconnected with UID: " + GetClientFromList(clientSocket).uid);
-                        clients.Remove(client);
-                        Console.WriteLine("Client removed from list.\n");
-
-                        //Notify other Clients that client has disconnected.
-                        foreach (ClientData c in clients)
-                        {
-                            c.SendDataPacketToClient(new Packet(Packet.PacketType.ClientDisconnected, client.uid + ";" + client.publicKey));
-                            Console.WriteLine(c.uid + " notified that " + client.uid + " has disconnected");
-                        }
+                        readBytes += clientStream.Read(buffer, readBytes, buffer.Length - readBytes);
                     }
 
-                    Console.ReadLine();
-                    Environment.Exit(1);
+                    //Daten sind im Buffer-Array
+                    DataManagerForIncommingClientData(new Packet(buffer), client);
                 }
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine("No: " + ex.ErrorCode + " Message: " + ex.Message);
+            }
+            catch (IOException)
+            {
+                ClientData disconnectedClient = GetClientFromList(client);
+                Console.WriteLine("Client disconnected with UID: " + GetClientFromList(client).UID);
+                clients.Remove(disconnectedClient);
+                Console.WriteLine("Client removed from list.\n");
+
+                //Notify other Clients that client has disconnected.
+                foreach (ClientData c in clients)
+                {
+                    c.SendDataPacketToClient(new Packet(Packet.PacketType.ClientDisconnected, disconnectedClient.UID + ";" + disconnectedClient.PublicKey));
+                    Console.WriteLine(c.UID + " notified that " + disconnectedClient.UID + " has disconnected");
+                }
+                Console.ReadLine();
+                Environment.Exit(0);
             }
         }
 
-        private static void DataManagerForIncommingClientData(Packet p, Socket clientSocket)
+        private static void DataManagerForIncommingClientData(Packet p, TcpClient clientSocket)
         {
             ClientData client;
             switch (p.type)
@@ -106,14 +110,14 @@ namespace MessageSystemCSServer
                 case Packet.PacketType.Registration:
                     Console.WriteLine("Client registered with UID: " + p.uid + " and Public-Key: " + p.publicKey);
                     client = GetClientFromList(clientSocket);
-                    client.uid = p.uid;
-                    client.publicKey = p.publicKey;
+                    client.UID = p.uid;
+                    client.PublicKey = p.publicKey;
                     client.SendDataPacketToClient(new Packet(Packet.PacketType.RegistrationSuccess));
 
                     //Notify clients that new Client has connected
                     foreach (ClientData c in clients)
                     {
-                        if (c.uid != p.uid)
+                        if (c.UID != p.uid)
                         {
                             c.SendDataPacketToClient(new Packet(Packet.PacketType.ClientConnected, p.uid + ";" + p.publicKey));
                         }
@@ -121,14 +125,14 @@ namespace MessageSystemCSServer
                     break;
                 case Packet.PacketType.GetClientList:
                     client = GetClientFromList(clientSocket);
-                    Console.WriteLine("Client " + client.uid + " wants Client List. Generating...");
+                    Console.WriteLine("Client " + client.UID + " wants Client List. Generating...");
 
                     List<object> dataList = new List<object>();
                     foreach (ClientData c in clients)
                     {
-                        if (c.uid != client.uid)
+                        if (c.UID != client.UID)
                         {
-                            dataList.Add(c.uid + ";" + c.publicKey);
+                            dataList.Add(c.UID + ";" + c.PublicKey);
                         }
                     }
                     client.SendDataPacketToClient(new Packet(Packet.PacketType.ClientList, dataList));
@@ -137,10 +141,10 @@ namespace MessageSystemCSServer
                     Console.WriteLine("Incomming Message from " + p.uid + " at " + p.messageTimeStamp.ToString("hh:mm:ss") + " to " + p.destinationUID + " data: " + Encoding.UTF8.GetString(p.messageData));
                     foreach (ClientData c in clients)
                     {
-                        if(c.uid == p.destinationUID)
+                        if(c.UID == p.destinationUID)
                         {
                             c.SendDataPacketToClient(new Packet(Packet.PacketType.Message, p.messageTimeStamp, p.uid, p.destinationUID, p.messageData));
-                            Console.WriteLine("Message send to " + c.uid);
+                            Console.WriteLine("Message send to " + c.UID);
                         }
                     }
                     break;
@@ -152,11 +156,11 @@ namespace MessageSystemCSServer
         /// </summary>
         /// <param name="clientSocket">Socket mit dem der Client mit dem Server verbunden ist</param>
         /// <returns>Gefundenen Client andernfalls null.</returns>
-        private static ClientData GetClientFromList(Socket clientSocket)
+        private static ClientData GetClientFromList(TcpClient tcpClient)
         {
             foreach (ClientData client in clients)
             {
-                if (client.clientSocket == clientSocket)
+                if (client.TcpClient == tcpClient)
                 {
                     return client;
                 }
@@ -174,7 +178,7 @@ namespace MessageSystemCSServer
         {
             foreach (ClientData client in clients)
             {
-                if (client.uid == uid)
+                if (client.UID == uid)
                 {
                     return client;
                 }

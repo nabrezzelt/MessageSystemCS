@@ -48,6 +48,7 @@
     <Compile Include="ConversationTabPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="FlashWindow.cs" />
     <Compile Include="frm_main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +94,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\NotificationWindow\NotificationWindow.csproj">
+      <Project>{605006eb-d4e6-4312-a293-3a43fac43240}</Project>
+      <Name>NotificationWindow</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MessageSysDataManagementLib\MessageSysDataManagementLib.csproj">
       <Project>{604e8022-2eba-414e-a2c6-29bac1ec3565}</Project>
       <Name>MessageSysDataManagementLib</Name>

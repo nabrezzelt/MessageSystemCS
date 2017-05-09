@@ -34,7 +34,7 @@
             this.tb_uid = new System.Windows.Forms.TextBox();
             this.lb_clients = new System.Windows.Forms.ListBox();
             this.tb_send_messages = new System.Windows.Forms.RichTextBox();
-            this.tb_received_messages = new System.Windows.Forms.RichTextBox();
+            this.tb_log = new System.Windows.Forms.RichTextBox();
             this.tb_ip = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tc_conversations = new System.Windows.Forms.TabControl();
@@ -92,14 +92,14 @@
             this.tb_send_messages.TabIndex = 6;
             this.tb_send_messages.Text = "";
             // 
-            // tb_received_messages
+            // tb_log
             // 
-            this.tb_received_messages.Location = new System.Drawing.Point(386, 76);
-            this.tb_received_messages.Name = "tb_received_messages";
-            this.tb_received_messages.ReadOnly = true;
-            this.tb_received_messages.Size = new System.Drawing.Size(145, 247);
-            this.tb_received_messages.TabIndex = 7;
-            this.tb_received_messages.Text = "";
+            this.tb_log.Location = new System.Drawing.Point(386, 76);
+            this.tb_log.Name = "tb_log";
+            this.tb_log.ReadOnly = true;
+            this.tb_log.Size = new System.Drawing.Size(145, 247);
+            this.tb_log.TabIndex = 7;
+            this.tb_log.Text = "";
             // 
             // tb_ip
             // 
@@ -136,7 +136,7 @@
             this.Controls.Add(this.tc_conversations);
             this.Controls.Add(this.tb_ip);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.tb_received_messages);
+            this.Controls.Add(this.tb_log);
             this.Controls.Add(this.tb_send_messages);
             this.Controls.Add(this.lb_clients);
             this.Controls.Add(this.tb_uid);
@@ -159,7 +159,7 @@
         private System.Windows.Forms.TextBox tb_uid;
         private System.Windows.Forms.ListBox lb_clients;
         private System.Windows.Forms.RichTextBox tb_send_messages;
-        private System.Windows.Forms.RichTextBox tb_received_messages;
+        private System.Windows.Forms.RichTextBox tb_log;
         private System.Windows.Forms.TextBox tb_ip;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TabControl tc_conversations;

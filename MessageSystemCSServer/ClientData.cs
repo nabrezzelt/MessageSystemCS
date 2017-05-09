@@ -11,23 +11,33 @@ namespace MessageSystemCSServer
 {
     class ClientData
     {
-        public Socket clientSocket;
-        private Thread clientThread;
-        public string publicKey;
-        public string uid;
+        private TcpClient _client;
+        private Thread _clientThread;
+        private NetworkStream _clientStream;
+        private string _publicKey;
+        private string _uid;
 
-        public ClientData(Socket clientSocket)
+        public TcpClient TcpClient { get => _client; set => _client = value; }       
+        public string UID { get => _uid; set => _uid = value; }
+        public string PublicKey { get => _publicKey; set => _publicKey = value; }
+
+        public ClientData(TcpClient client)
         {
-            this.clientSocket = clientSocket;
-
+            this._client = client;
+            this._clientStream = client.GetStream();
             //Starte für jeden Client nach dem Verbinden einen seperaten Thread in dem auf neue eingehende Nachrichten gehört/gewartet wird.
-            clientThread = new Thread(Server.DataIn);
-            clientThread.Start(clientSocket);
+            _clientThread = new Thread(Server.DataIn);
+            _clientThread.Start(client);
         }
 
-        public void SendDataPacketToClient(Packet p)
+        public void SendDataPacketToClient(Packet packet)
         {
-            clientSocket.Send(p.ConvertToBytes());
+            byte[] packetBytes = packet.ConvertToBytes();
+
+            var length = packetBytes.Length;
+            var lengthBytes = BitConverter.GetBytes(length);
+            _clientStream.Write(lengthBytes, 0, 4); //Senden der Länge/Größe des Textes
+            _clientStream.Write(packetBytes, 0, packetBytes.Length); //Senden der eingentlichen Daten/des Textes  
         }
     }
 }

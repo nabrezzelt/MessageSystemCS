@@ -13,6 +13,7 @@ namespace MessageSystemCSDesktopApp
         private string _publicKey;
         private frm_main main;
         private bool _disabled = false;
+        private int _newMessages;
 
         //Controls
         private Button btn_send;
@@ -24,14 +25,15 @@ namespace MessageSystemCSDesktopApp
         public string PublicKey { get => _publicKey; set => _publicKey = value; }
         public string UID { get => _uid; set => _uid = value; }
         public bool Disabled { get => _disabled; set => _disabled = value; }
+        public int NewMessages { get => _newMessages; set => _newMessages = value; }
 
         public ConversationTabPage(frm_main main, string uid, string publicKey)
         {
             this.main = main;
             _publicKey = publicKey;
             _uid = uid;
-
-            InitializeComponent();            
+            _newMessages = 0;
+            InitializeComponent();                
         }
 
         private void InitializeComponent()
@@ -83,7 +85,7 @@ namespace MessageSystemCSDesktopApp
             this.tb_send_message.TabIndex = 2;
             this.tb_send_message.Text = "";
             this.tb_send_message.MaxLength = 550;
-            this.tb_send_message.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tb_send_message_KeyDown);
+            this.tb_send_message.KeyUp += tb_send_message_KeyUp;
             // 
             // panelReceive
             // 
@@ -107,26 +109,29 @@ namespace MessageSystemCSDesktopApp
 
         }
 
-        private void tb_send_message_KeyDown(object sender, KeyEventArgs e)
+        private void tb_send_message_KeyUp(object sender, KeyEventArgs e)
         {
-            //if(e.KeyCode == Keys.Enter && e.Shift)
-            //{
-            //    main.Log("Shift + Enter pressed.");
-            //}
-            //else 
-            if (e.KeyCode == Keys.Enter && !e.Shift)
+            if (e.KeyCode == Keys.Enter && e.Shift)
+            {
+                main.Log("Shift + Enter pressed.");
+            }
+            else if (e.KeyCode == Keys.Enter && !e.Shift)
             {
                 main.Log("Only Enter pressed.");
                 btn_send.PerformClick();
+                tb_send_message.Clear();
+                tb_send_message.Text = String.Empty;
                 main.Log("Message sent.");
             }
         }
 
         private void btn_send_Click(object sender, EventArgs e)
         {
-            main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text));
-            NewMessageFromMe(DateTime.Now, tb_send_message.Text);
-            tb_send_message.Clear();
+            if(!String.IsNullOrWhiteSpace(tb_send_message.Text) || !String.IsNullOrEmpty(tb_send_message.Text))
+            {
+                main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray())));
+                NewMessageFromMe(DateTime.Now, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray()));
+            }                      
         }
 
         public void DisableAll(string message)
