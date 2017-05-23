@@ -1,6 +1,8 @@
-﻿namespace MessageSystemCSDesktopApp
+﻿using System.Windows.Forms;
+
+namespace MessageSystemCSDesktopApp
 {
-    partial class frm_main
+    partial class frm_main : Form
     {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -133,7 +135,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(543, 568);
+            this.ClientSize = new System.Drawing.Size(924, 568);
             this.Controls.Add(this.tc_conversations);
             this.Controls.Add(this.tb_ip);
             this.Controls.Add(this.label3);

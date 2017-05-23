@@ -44,7 +44,7 @@ namespace MessageSystemCSDesktopApp
             if (tb_uid.Text == "")
             {
                 tb_uid.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            }
+            }            
         }
 
         private void btn_connect_Click(object sender, EventArgs e)
@@ -153,9 +153,9 @@ namespace MessageSystemCSDesktopApp
         }
 
         private void OnNewMessage(string senderUID, DateTime timeStamp, string message)
-        {
+        {            
             //wenn neue Message kommt und Fenster hat nicht den Focus oder ist minimiert dann blink
-            if(!this.Focused || this.WindowState == FormWindowState.Minimized)
+            if (!this.Focused || this.WindowState == FormWindowState.Minimized)
             {
                 FlashWindow.Start(this);               
             }

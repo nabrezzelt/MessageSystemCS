@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MessageSysDataManagementLib;
 
 namespace MessageSystemCSDesktopApp
 {
-    class ConversationTabPage : TabPage
+    public class ConversationTabPage : TabPage
     {
         private string _uid;
         private string _publicKey;
@@ -19,7 +20,7 @@ namespace MessageSystemCSDesktopApp
         private Button btn_send;
         private Panel panelSend;
         private RichTextBox tb_send_message;
-        private RichTextBox tb_receive_message;
+        private WebBrowser wb_receive_message;
         private Panel panelReceive;
 
         public string PublicKey { get => _publicKey; set => _publicKey = value; }
@@ -54,14 +55,17 @@ namespace MessageSystemCSDesktopApp
             _publicKey = publicKey;
             _uid = uid;
             _newMessages = 0;
-            InitializeComponent();                
+            InitializeComponent();
+
+            setDefaultHTML();
+            MessageBox.Show(wb_receive_message.DocumentText);
         }
 
         private void InitializeComponent()
         {
             this.btn_send = new Button();
             this.panelSend = new Panel();
-            this.tb_receive_message = new RichTextBox();
+            this.wb_receive_message = new WebBrowser();
             this.tb_send_message = new RichTextBox();
             this.panelReceive = new Panel();
             this.panelSend.SuspendLayout();
@@ -90,16 +94,13 @@ namespace MessageSystemCSDesktopApp
             this.panelSend.TabIndex = 1;
             this.panelSend.GotFocus += panelSend_GotFocus;
             // 
-            // tb_receive_message
+            // wb_receive_message
             // 
-            this.tb_receive_message.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tb_receive_message.Location = new System.Drawing.Point(0, 0);
-            this.tb_receive_message.Name = "tb_receive_message";
-            this.tb_receive_message.ReadOnly = true;
-            this.tb_receive_message.Size = new System.Drawing.Size(344, 311);
-            this.tb_receive_message.TabIndex = 1;
-            this.tb_receive_message.Text = "";
-            this.tb_receive_message.GotFocus += tb_receive_message_GotFocus;
+            this.wb_receive_message.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.wb_receive_message.Location = new System.Drawing.Point(0, 0);
+            this.wb_receive_message.Size = new System.Drawing.Size(344, 311);
+            this.wb_receive_message.TabIndex = 1;
+            this.wb_receive_message.GotFocus += tb_receive_message_GotFocus;
             // 
             // tb_send_message
             // 
@@ -114,13 +115,14 @@ namespace MessageSystemCSDesktopApp
             // 
             // panelReceive
             // 
-            this.panelReceive.Controls.Add(this.tb_receive_message);
+            this.panelReceive.Controls.Add(this.wb_receive_message);
             this.panelReceive.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelReceive.Location = new System.Drawing.Point(0, 0);
             this.panelReceive.Name = "panelReceive";
             this.panelReceive.Size = new System.Drawing.Size(344, 311);
             this.panelReceive.TabIndex = 3;
             this.panelReceive.GotFocus += panelReceive_GotFocus;
+            
             // 
             // ConversationTabPage
             // 
@@ -133,7 +135,6 @@ namespace MessageSystemCSDesktopApp
             this.panelReceive.ResumeLayout(false);
             this.ResumeLayout(false);
             this.GotFocus += ConversationTabPage_GotFocus;
-
         }
 
         private void btn_send_GotFocus(object sender, EventArgs e)
@@ -186,15 +187,16 @@ namespace MessageSystemCSDesktopApp
         {
             if(!String.IsNullOrWhiteSpace(tb_send_message.Text) || !String.IsNullOrEmpty(tb_send_message.Text))
             {
+                main.Log(tb_send_message.Text);
                 main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray())));
-                NewMessageFromMe(DateTime.Now, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray()));
+                NewMessageFromMe(DateTime.Now, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray()));                
             }                      
         }
 
         public void DisableAll(string message)
         {
             btn_send.Enabled = false;
-            tb_receive_message.Enabled = false;
+
             tb_send_message.Enabled = false;
 
             if(message != "")
@@ -208,7 +210,7 @@ namespace MessageSystemCSDesktopApp
         public void EnableAll(string message = "")
         {
             btn_send.Enabled = true;
-            tb_receive_message.Enabled = true;
+
             tb_send_message.Enabled = true;
 
             if (message != "")
@@ -219,17 +221,118 @@ namespace MessageSystemCSDesktopApp
 
         private void ShowSystemMessage(string message)
         {
-            tb_receive_message.Text += message + "\n";
+            //tb_receive_message.Text += message + "\n";
+            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='system-message'>" + message + "</div>";
+            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Window.Size.Height);
         }
 
         public void NewMessageFromMe(DateTime messageTimeStamp, string message)
         {
-            tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - Du: " + message + "\n";           
+            //tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - Du: " + message + "\n"; 
+            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='my-message'>" + Emojione.ReplaceAllShortnamesWithHTML(message) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'>" + messageTimeStamp.ToString() + "</span></div></div>";
+            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Window.Size.Height);
         }
 
         public void NewMessageFromOther(string otherUID, DateTime messageTimeStamp, string message)
         {
-            tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - " + otherUID + ": " + message + "\n";
+            //tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - " + otherUID + ": " + message + "\n";
+            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='other-message'>" + Emojione.ReplaceAllShortnamesWithHTML(message) + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'>" + messageTimeStamp.ToString() + "</span></div></div>";
+            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Window.Size.Height);
+        }
+
+        private void setDefaultHTML()
+        {
+            string defaultHTML = "<html> " +
+                                "<head>" +
+                                "<meta http-equiv='X-UA-Compatible' content='IE=10' />" +
+                                "    <style>" +
+                                "        body {" +
+                                "            font-family: 'Open Sans', sans-serif;" +
+                                "            background-color: #47484b;" +
+                                "        }" +
+                                "        .my-message {" +
+                                "            background: #a0a0a0;" +
+                                "            border-color: #a0a0a0;" +
+                                "            color: white; " +
+                                "            border-radius: 4px; " +
+                                "            width: 75%; " +
+                                "            padding: 15px; " +
+                                "            margin-bottom: 5px; " +
+                                "            margin-top: 5px; " +
+                                "            float: right;" +
+                                "            font-size: 13px; " +
+                                "        }" +
+                                "        .chat-container {" +
+                                "            overflow-y: scroll;" +
+                                "            height: 600px;" +
+                                "            border: 0.5px dimgrey solid;" +
+                                "        }" +
+                                "        .system-message { " +
+                                "           width: 70%; " +
+                                "           float: right; " +
+                                "           background: rgba(168, 255, 0, 0.4); " +
+                                "           border-color: #a0a0a0; " +
+                                "           color: white; " +
+                                "           border-radius: 4px; " +
+                                "           padding-left: 7px; " +
+                                "           margin-bottom: 5px; " +
+                                "           margin-top: 5px; " +
+                                "           font-size: 11px; " +
+                                "           text-align: center; " +
+                                "           padding-right: 7px; " +
+                                "           margin-right: 15%; " +
+                                "           padding-top: 5px; " +
+                                "           padding-bottom: 5px; " +
+                                "        }" +
+                                "        .other-message {" +
+                                "            background-color: #2a9fd6;" +
+                                "            border-color: #2a9fd6;" +
+                                "            color: white;        " +
+                                "            border-radius: 4px;     " +
+                                "            width: 75%;" +
+                                "            padding: 15px;" +
+                                "            margin-bottom: 5px;" +
+                                "            margin-top: 5px;" +
+                                "            float: left;       " +
+                                "            font-size: 13px; " +
+                                "        }" +
+                                "        .message-data {" +
+                                "            font-size: 11px;" +
+                                "            text-align: right;" +
+                                "        }" +
+                                "        .message-data-other {" +
+                                "            color: rgb(86, 86, 86);" +
+                                "            font-size: 11px;" +
+                                "            text-align: right;" +
+                                "        }" +
+                                "        .message-textbox {" +
+                                "            border-radius: 0px;" +
+                                "        }" +
+                                "        .other-message > a {" +
+                                "            color: #302b26;" +
+                                "        }" +
+                                "        .other-message > a:hover {" +
+                                "            color: #090909;" +
+                                "        }" +
+                                "        .emojione {" +
+                                "            width: 24px;" +
+                                "            height: 24px;" +
+                                "        }" +
+                                "    </style>" +
+                                "</head>" +
+                                "<body>" +
+                                "    <div id='chat-history'>" +
+                                "    </div>    " +
+                                "</body>" +
+                                "</html>";
+
+            wb_receive_message.Navigate("about:blank");
+            if (wb_receive_message.Document != null)
+            {
+                wb_receive_message.Document.Write(string.Empty);
+            }
+            wb_receive_message.DocumentText = defaultHTML;
+            wb_receive_message.Document.Write(defaultHTML);
         }
     }
 }
