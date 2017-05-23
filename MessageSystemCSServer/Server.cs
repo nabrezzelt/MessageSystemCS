@@ -108,8 +108,16 @@ namespace MessageSystemCSServer
             switch (p.type)
             {
                 case Packet.PacketType.Registration:
-                    Console.WriteLine("Client registered with UID: " + p.uid + " and Public-Key: " + p.publicKey);
+                    Console.WriteLine("Client wants to register with UID: " + p.uid + " and Public-Key: " + p.publicKey);
                     client = GetClientFromList(clientSocket);
+
+                    foreach (ClientData c in clients)
+                    {
+                        if(c.UID.ToLower() == p.uid.ToLower())
+                        {
+                            client.SendDataPacketToClient(new Packet(Packet.PacketType.RegistrationFail, "User with this uid already exists!"));
+                        }
+                    }
                     client.UID = p.uid;
                     client.PublicKey = p.publicKey;
                     client.SendDataPacketToClient(new Packet(Packet.PacketType.RegistrationSuccess));
@@ -138,7 +146,7 @@ namespace MessageSystemCSServer
                     client.SendDataPacketToClient(new Packet(Packet.PacketType.ClientList, dataList));
                     break;
                 case Packet.PacketType.Message:
-                    Console.WriteLine("Incomming Message from " + p.uid + " at " + p.messageTimeStamp.ToString("hh:mm:ss") + " to " + p.destinationUID + " data: " + Encoding.UTF8.GetString(p.messageData));
+                    Console.WriteLine("Incomming Message from " + p.uid + " at " + p.messageTimeStamp.ToString("HH:mm:ss") + " to " + p.destinationUID + " data: " + Encoding.UTF8.GetString(p.messageData));
                     foreach (ClientData c in clients)
                     {
                         if(c.UID == p.destinationUID)

@@ -119,6 +119,7 @@ namespace MessageSysDataManagementLib
         {
             Registration,
             RegistrationSuccess,
+            RegistrationFail,
             Message,
             ClientDisconnected,
             ClientConnected,

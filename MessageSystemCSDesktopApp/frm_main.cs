@@ -32,7 +32,7 @@ namespace MessageSystemCSDesktopApp
             Tuple<string, string> keyPair = KeyManagement.CreateKeyPair();
             privateKey = keyPair.Item1;
             publicKey = keyPair.Item2;
-            MessageBox.Show(privateKey);
+            MessageBox.Show("Private-Key:\n\n" + privateKey);
 
             //tc_conversations.HandleCreated += tc_conversations_HandleCreated;
             tc_conversations.Padding = new Point(15, 4);
@@ -40,17 +40,27 @@ namespace MessageSystemCSDesktopApp
 
             tb_uid.Text = Properties.Settings.Default.UID;
             tb_ip.Text = Properties.Settings.Default.ServerIP;
+
+            if (tb_uid.Text == "")
+            {
+                tb_uid.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            }
         }
 
         private void btn_connect_Click(object sender, EventArgs e)
-        {
+        {            
+            if(tb_uid.Text == String.Empty || tb_ip.Text == String.Empty)
+            {
+                return;
+            }
+
             uid = tb_uid.Text;
 
             ConnectToServer(tb_ip.Text, PORT);
 
             Properties.Settings.Default.UID = uid;
             Properties.Settings.Default.ServerIP = tb_ip.Text;
-            Properties.Settings.Default.Save();
+            Properties.Settings.Default.Save();            
 
             //Starte Thread zum Empfangen von Daten
             Thread receiveDataThread = new Thread(DataIn);
@@ -58,7 +68,7 @@ namespace MessageSystemCSDesktopApp
 
             //Register            
             SendDataToServer(new Packet(Packet.PacketType.Registration, uid, publicKey));
-            InvokeGUIThread(() => { tb_log.Text += ">> Registration-Packet sent.\n"; });            
+            Log("Registration-Packet sent.\n");
 
             btn_connect.Enabled = false;
         }
@@ -78,13 +88,19 @@ namespace MessageSystemCSDesktopApp
             switch (packet.type)
             {               
                 case Packet.PacketType.RegistrationSuccess:
-                    InvokeGUIThread(() => { tb_log.Text += ">> Registration was successfull.\n"; });
+                    Log("Registration was successfull.\n");
                     GetClientist();
                     break;
+                case Packet.PacketType.RegistrationFail:
+                    tcpClient.Close();
+                    Log("Registration failed.");
+                    MessageBox.Show("Registration failed!\n\nDetails:\n" + packet.singleStringData, "Registration failed!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    
+                    break;
                 case Packet.PacketType.ClientList:
-                    InvokeGUIThread(() => {
-                        tb_log.Text += ">> ClientList received.\n";
+                    Log("ClientList received.");
 
+                    InvokeGUIThread(() => {
                         foreach (object clientdata in packet.data)
                         {
                             string[] data = ((string) clientdata).Split(';');
@@ -93,10 +109,10 @@ namespace MessageSystemCSDesktopApp
                     });
                     break;
                 case Packet.PacketType.ClientConnected:
-                    InvokeGUIThread(() => {
-                        tb_log.Text += ">> New Client connected.\n";
-                        
-                        string[] data = ((string)packet.singleStringData).Split(';');
+                    Log("New Client connected.");
+
+                    InvokeGUIThread(() => {                                                
+                        string[] data = (packet.singleStringData).Split(';');
                         lb_clients.Items.Add(new LocalClientData(data[0], data[1]));                        
                     });
                     break;
@@ -123,42 +139,46 @@ namespace MessageSystemCSDesktopApp
                                 lb_clients.Items.Remove(item);
                                 break;
                             }
-                        }
-                        
+                        }                        
                     });
                     break;
                 case Packet.PacketType.Message:
                     Log("Incomming Message from " + packet.uid);
                     InvokeGUIThread(() => {
-                        foreach (ConversationTabPage conversation in tc_conversations.TabPages)
-                        {
-                            if (packet.uid == conversation.UID)
-                            {
-                                if(conversation.Disabled)
-                                {
-                                    conversation.EnableAll("Client reconnected");
-                                }                               
-                                conversation.NewMessageFromOther(conversation.UID, packet.messageTimeStamp, KeyManagement.Decrypt(privateKey, packet.messageData));                                
-                                return;
-                            }
-                        }
-
-                        string publicKey = "";
-                        foreach (LocalClientData c in lb_clients.Items)
-                        {
-                            if(c.uid == packet.uid)
-                            {
-                                publicKey = c.publicKey;
-                            }
-                        }
-
-                        //Noch keine Conversation offen -> neue öffnen
-                        tc_conversations.TabPages.Add(new ConversationTabPage(this, packet.uid, publicKey));
-                        ((ConversationTabPage)tc_conversations.TabPages[tc_conversations.TabPages.Count - 1]).NewMessageFromOther(packet.uid, packet.messageTimeStamp, KeyManagement.Decrypt(privateKey, packet.messageData));
+                        OnNewMessage(packet.uid, packet.messageTimeStamp, KeyManagement.Decrypt(privateKey, packet.messageData));
                     });
                     
                     break;
             }
+        }
+
+        private void OnNewMessage(string senderUID, DateTime timeStamp, string message)
+        {
+            //wenn neue Message kommt und Fenster hat nicht den Focus oder ist minimiert dann blink
+            if(!this.Focused || this.WindowState == FormWindowState.Minimized)
+            {
+                FlashWindow.Start(this);               
+            }
+
+            ConversationTabPage userTab = TabExistsForUID(senderUID);
+
+            if (userTab != null) //Tab not exists
+            {
+                userTab.NewMessageFromOther(senderUID, timeStamp, message);
+
+                //if (TabIsActiveForUID(senderUID) == null) //Also nicht aktiv
+                //{                   
+                //    //Blink
+                //}                
+            }
+            else
+            {
+                tc_conversations.TabPages.Add(new ConversationTabPage(this, senderUID, GetPublicKeyForUID(senderUID)));
+                ConversationTabPage lastTP = (ConversationTabPage) tc_conversations.TabPages[tc_conversations.TabPages.Count - 1];
+
+                lastTP.NewMessageFromOther(senderUID, timeStamp, message);                
+                //Blink
+            }           
         }
 
         private void ConnectToServer(string ip, int port)
@@ -169,10 +189,11 @@ namespace MessageSystemCSDesktopApp
             {
                 try
                 {
-                    InvokeGUIThread(() => { tb_log.Text += ">> Trying to connect at " + ip + " on port " + port + "...\n"; });
+                    Log("Trying to connect at " + ip + " on port " + port + "...");
                     tcpClient.Connect(new IPEndPoint(IPAddress.Parse(ip), port));
                     clientStream = tcpClient.GetStream();
-                    InvokeGUIThread(() => { tb_log.Text += ">> Connected\n"; });
+                    Log("Connected");
+                    MessageBox.Show("Connected!");
                 }
                 catch (Exception ex)
                 {
@@ -246,7 +267,7 @@ namespace MessageSystemCSDesktopApp
                 {
                     if(conversation.UID == ((LocalClientData)lb_clients.SelectedItem).uid && conversation.PublicKey == ((LocalClientData)lb_clients.SelectedItem).publicKey)
                     {
-                        tb_log.Text += ">> Conversation already exists.\n";
+                        Log(">> Conversation already exists.");
                         tc_conversations.SelectedTab = conversation;
                         return;
                     }
@@ -259,7 +280,7 @@ namespace MessageSystemCSDesktopApp
 
         public void Log(string message)
         {
-            InvokeGUIThread(() => { tb_log.Text += ">> " + message + "\n"; });
+            InvokeGUIThread(() => { tb_log.Text += ">> " + message + "\n"; tb_log.ScrollToCaret(); });
         }       
         
         public void SendMessage(string destinationID, byte[] encrypedMessage)
@@ -293,12 +314,56 @@ namespace MessageSystemCSDesktopApp
                 }
             }
         }
-        //[DllImport("user32.dll")]
-        //private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
-        //private const int TCM_SETMINTABWIDTH = 0x1300 + 49;
-        //private void tc_conversations_HandleCreated(object sender, EventArgs e)
-        //{
-        //    SendMessage(tc_conversations.Handle, TCM_SETMINTABWIDTH, IntPtr.Zero, (IntPtr)16);
-        //}
+
+        private ConversationTabPage TabExistsForUID(string uid)
+        {
+            foreach (ConversationTabPage conversation in tc_conversations.TabPages)
+            {
+                if(conversation.UID == uid)
+                {
+                    return conversation;
+                }
+            }
+
+            return null;
+        }
+
+        private bool TabIsActiveForUID(string uid)
+        {
+            ConversationTabPage currentTab = (ConversationTabPage) tc_conversations.SelectedTab;
+
+            if (currentTab.UID == uid)
+            {
+                return true;
+            }           
+
+            return false;
+        }        
+
+        private string GetPublicKeyForUID(string uid)
+        {
+            foreach (LocalClientData client in lb_clients.Items)
+            {
+                if (client.uid == uid)
+                {
+                    return client.publicKey;
+                }
+            }
+
+            throw new Exception("Client does not exist!");
+        }       
+
+        private void tc_conversations_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ConversationTabPage currentTab = (ConversationTabPage) tc_conversations.SelectedTab;
+
+            if(currentTab != null)
+            currentTab.NewMessages = 0;
+        }
+
+        private void frm_main_Activated(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(this);
+        }
     }
 }

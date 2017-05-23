@@ -25,7 +25,28 @@ namespace MessageSystemCSDesktopApp
         public string PublicKey { get => _publicKey; set => _publicKey = value; }
         public string UID { get => _uid; set => _uid = value; }
         public bool Disabled { get => _disabled; set => _disabled = value; }
-        public int NewMessages { get => _newMessages; set => _newMessages = value; }
+        public int NewMessages {
+            get
+            {
+                return _newMessages;
+            }
+            set {
+                _newMessages = value;
+                UpdateText();
+            }
+        }
+
+        private void UpdateText()
+        {
+            if(NewMessages > 0)
+            {
+                this.Text = UID + " (" + NewMessages + ")";
+            }
+            else
+            {
+                this.Text = UID;
+            }            
+        }
 
         public ConversationTabPage(frm_main main, string uid, string publicKey)
         {
@@ -56,6 +77,7 @@ namespace MessageSystemCSDesktopApp
             this.btn_send.Text = "Send";
             this.btn_send.UseVisualStyleBackColor = true;
             this.btn_send.Click += new System.EventHandler(this.btn_send_Click);
+            this.btn_send.GotFocus += btn_send_GotFocus;
             // 
             // panelSend
             // 
@@ -66,6 +88,7 @@ namespace MessageSystemCSDesktopApp
             this.panelSend.Name = "panelSend";
             this.panelSend.Size = new System.Drawing.Size(344, 122);
             this.panelSend.TabIndex = 1;
+            this.panelSend.GotFocus += panelSend_GotFocus;
             // 
             // tb_receive_message
             // 
@@ -76,6 +99,7 @@ namespace MessageSystemCSDesktopApp
             this.tb_receive_message.Size = new System.Drawing.Size(344, 311);
             this.tb_receive_message.TabIndex = 1;
             this.tb_receive_message.Text = "";
+            this.tb_receive_message.GotFocus += tb_receive_message_GotFocus;
             // 
             // tb_send_message
             // 
@@ -86,6 +110,7 @@ namespace MessageSystemCSDesktopApp
             this.tb_send_message.Text = "";
             this.tb_send_message.MaxLength = 550;
             this.tb_send_message.KeyUp += tb_send_message_KeyUp;
+            this.tb_send_message.GotFocus += tb_send_message_GotFocus;
             // 
             // panelReceive
             // 
@@ -95,8 +120,9 @@ namespace MessageSystemCSDesktopApp
             this.panelReceive.Name = "panelReceive";
             this.panelReceive.Size = new System.Drawing.Size(344, 311);
             this.panelReceive.TabIndex = 3;
+            this.panelReceive.GotFocus += panelReceive_GotFocus;
             // 
-            // test
+            // ConversationTabPage
             // 
             this.ClientSize = new System.Drawing.Size(344, 433);
             this.Controls.Add(this.panelReceive);
@@ -106,7 +132,38 @@ namespace MessageSystemCSDesktopApp
             this.panelSend.ResumeLayout(false);
             this.panelReceive.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.GotFocus += ConversationTabPage_GotFocus;
 
+        }
+
+        private void btn_send_GotFocus(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(main);
+        }
+
+        private void panelSend_GotFocus(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(main);
+        }
+
+        private void tb_receive_message_GotFocus(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(main);
+        }
+
+        private void tb_send_message_GotFocus(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(main);
+        }
+
+        private void panelReceive_GotFocus(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(main);
+        }
+
+        private void ConversationTabPage_GotFocus(object sender, EventArgs e)
+        {
+            FlashWindow.Stop(main);
         }
 
         private void tb_send_message_KeyUp(object sender, KeyEventArgs e)
@@ -167,12 +224,12 @@ namespace MessageSystemCSDesktopApp
 
         public void NewMessageFromMe(DateTime messageTimeStamp, string message)
         {
-            tb_receive_message.Text += messageTimeStamp.ToString("hh:mm:ss") + " - Du: " + message + "\n";           
+            tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - Du: " + message + "\n";           
         }
 
         public void NewMessageFromOther(string otherUID, DateTime messageTimeStamp, string message)
         {
-            tb_receive_message.Text += messageTimeStamp.ToString("hh:mm:ss") + " - " + otherUID + ": " + message + "\n";
+            tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - " + otherUID + ": " + message + "\n";
         }
     }
 }

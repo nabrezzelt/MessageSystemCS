@@ -126,6 +126,7 @@
             this.tc_conversations.Size = new System.Drawing.Size(368, 498);
             this.tc_conversations.TabIndex = 11;
             this.tc_conversations.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tc_conversations_DrawItem);
+            this.tc_conversations.SelectedIndexChanged += new System.EventHandler(this.tc_conversations_SelectedIndexChanged);
             this.tc_conversations.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tc_conversations_MouseDown);
             // 
             // frm_main
@@ -145,6 +146,7 @@
             this.Controls.Add(this.btn_connect);
             this.Name = "frm_main";
             this.Text = "MessageSystemCS | DesktopApp";
+            this.Activated += new System.EventHandler(this.frm_main_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frm_main_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();

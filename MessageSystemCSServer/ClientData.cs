@@ -28,6 +28,9 @@ namespace MessageSystemCSServer
             //Starte für jeden Client nach dem Verbinden einen seperaten Thread in dem auf neue eingehende Nachrichten gehört/gewartet wird.
             _clientThread = new Thread(Server.DataIn);
             _clientThread.Start(client);
+
+            _publicKey = "";
+            _uid = "";
         }
 
         public void SendDataPacketToClient(Packet packet)
