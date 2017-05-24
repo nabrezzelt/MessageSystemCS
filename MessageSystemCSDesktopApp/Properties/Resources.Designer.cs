@@ -63,6 +63,16 @@ namespace MessageSystemCSDesktopApp.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap emoticon {
+            get {
+                object obj = ResourceManager.GetObject("emoticon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap IconClose {
             get {
                 object obj = ResourceManager.GetObject("IconClose", resourceCulture);

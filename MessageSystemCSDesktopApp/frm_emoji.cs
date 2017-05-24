@@ -43,8 +43,9 @@ namespace MessageSystemCSDesktopApp
             this.Controls.Add(this.pnl_main);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "frm_emoji";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "asd";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.Text = "frm_emoji";
+            this.Deactivate += new System.EventHandler(this.frm_emoji_Deactivate);
             this.ResumeLayout(false);
 
         }
@@ -59,7 +60,7 @@ namespace MessageSystemCSDesktopApp
             {                
                 PictureBox pb = new PictureBox();
                 pb.Location = new Point(currentWidth, currentHeight);
-                pb.Name = entry.Value;
+                pb.Name = entry.Key;
                 pb.Size = new Size(24, 24);
                 pb.SizeMode = PictureBoxSizeMode.StretchImage;
                 pb.LoadAsync(Emojione.UnicodeToUrl(entry.Value));
@@ -82,12 +83,17 @@ namespace MessageSystemCSDesktopApp
 
         private void Pb_Click(object sender, System.EventArgs e)
         {
-            MessageBox.Show(((PictureBox) sender).Name);
+           tabpage.AppendEmoijiShortname(":" + ((PictureBox) sender).Name + ":");
         }
 
         private void pnl_main_MouseEnter(object sender, System.EventArgs e)
         {
             pnl_main.Focus();
+        }
+
+        private void frm_emoji_Deactivate(object sender, System.EventArgs e)
+        {
+            this.Hide();
         }
     }
 }

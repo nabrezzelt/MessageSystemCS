@@ -44,7 +44,7 @@ namespace MessageSystemCSDesktopApp
             if (tb_uid.Text == "")
             {
                 tb_uid.Text = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-            }            
+            }
         }
 
         private void btn_connect_Click(object sender, EventArgs e)
@@ -355,10 +355,7 @@ namespace MessageSystemCSDesktopApp
 
         private void tc_conversations_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ConversationTabPage currentTab = (ConversationTabPage) tc_conversations.SelectedTab;
-
-            if(currentTab != null)
-            currentTab.NewMessages = 0;
+            ConversationTabPage currentTab = (ConversationTabPage) tc_conversations.SelectedTab;            
         }
 
         private void frm_main_Activated(object sender, EventArgs e)

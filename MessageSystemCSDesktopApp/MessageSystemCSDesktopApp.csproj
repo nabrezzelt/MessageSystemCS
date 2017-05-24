@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>message.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,6 +51,9 @@
     <Compile Include="ConversationTabPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ConversationTabPage.Designer.cs">
+      <DependentUpon>ConversationTabPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="FlashWindow.cs" />
     <Compile Include="frm_emoji.cs">
       <SubType>Form</SubType>
@@ -61,9 +67,11 @@
     <Compile Include="LocalClientData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ConversationTabPage.resx">
+      <DependentUpon>ConversationTabPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frm_emoji.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>frm_emoji1.Designer.cs</LastGenOutput>
+      <DependentUpon>frm_emoji.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frm_main.resx">
       <DependentUpon>frm_main.cs</DependentUpon>
@@ -99,6 +107,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ic_close_black_24dp_1x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="message.ico" />
+    <Content Include="Resources\emoticon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
