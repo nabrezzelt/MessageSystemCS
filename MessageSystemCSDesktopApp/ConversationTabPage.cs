@@ -7,7 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MessageSysDataManagementLib; 
+using MessageSysDataManagementLib;
+using System.Text.RegularExpressions;
 
 namespace MessageSystemCSDesktopApp
 {
@@ -36,7 +37,8 @@ namespace MessageSystemCSDesktopApp
             this.Text = uid;
 
             SetDefaultHTML();
-            MessageBox.Show(wb_receive_message.DocumentText);       
+
+            wb_receive_message.Navigating += wb_receive_message_Navigating;
         }
 
         private void conversationTapPage_GotFocus(object sender, EventArgs e)
@@ -46,6 +48,8 @@ namespace MessageSystemCSDesktopApp
 
         private void tb_send_message_KeyUp(object sender, KeyEventArgs e)
         {
+            FlashWindow.Stop(main);
+
             if (e.KeyCode == Keys.Enter && e.Shift)
             {
                 main.Log("Shift + Enter pressed.");
@@ -53,8 +57,7 @@ namespace MessageSystemCSDesktopApp
             else if (e.KeyCode == Keys.Enter && !e.Shift)
             {
                 main.Log("Only Enter pressed.");
-                btn_send.PerformClick();
-                tb_send_message.Clear();                
+                btn_send.PerformClick();                                
                 main.Log("Message sent.");
             }
         }
@@ -66,6 +69,7 @@ namespace MessageSystemCSDesktopApp
                 main.Log(tb_send_message.Text);
                 main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray())));
                 NewMessageFromMe(DateTime.Now, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray()));
+                tb_send_message.Clear();
             }
         }
 
@@ -99,21 +103,24 @@ namespace MessageSystemCSDesktopApp
         {
             //tb_receive_message.Text += message + "\n";
             wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='system-message'>" + message + "</div>";
-            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Window.Size.Height);
+            Application.DoEvents();
+            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Body.ScrollRectangle.Height);            
         }
 
         public void NewMessageFromMe(DateTime messageTimeStamp, string message)
-        {
+       {
             //tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - Du: " + message + "\n"; 
-            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='my-message'>" + Emojione.ReplaceAllShortnamesWithHTML(message) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'>" + messageTimeStamp.ToString() + "</span></div></div>";
-            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Window.Size.Height);
+            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='my-message'>" + SetFormatHTMLEmoticons(message) + "<div class='message-data text-right text-muted'><span class='glyphicon glyphicon-time'>" + messageTimeStamp.ToString("HH:mm:ss") + "</span></div></div>";
+            Application.DoEvents();
+            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Body.ScrollRectangle.Height);
         }
 
         public void NewMessageFromOther(string otherUID, DateTime messageTimeStamp, string message)
         {
             //tb_receive_message.Text += messageTimeStamp.ToString("HH:mm:ss") + " - " + otherUID + ": " + message + "\n";
-            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='other-message'>" + Emojione.ReplaceAllShortnamesWithHTML(message) + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'>" + messageTimeStamp.ToString() + "</span></div></div>";
-            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Window.Size.Height);
+            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='other-message'>" + SetFormatHTMLEmoticons(message) + "<div class='message-data-other text-right text-muted'><span class='glyphicon glyphicon-time'>" + messageTimeStamp.ToString("HH:mm:ss") + "</span></div></div>";
+            Application.DoEvents();
+            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Body.ScrollRectangle.Height);
         }
 
         private void SetDefaultHTML()
@@ -229,6 +236,31 @@ namespace MessageSystemCSDesktopApp
                 emoji.Location = new Point(MousePosition.X, MousePosition.Y);
                 emoji.Show();
             }
+        }
+
+        private void wb_receive_message_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+        {
+            if (e.Url.ToString() != "about:blank")
+            {
+                System.Diagnostics.Process.Start(e.Url.ToString());
+                e.Cancel = true;
+            }
+        }
+
+        private string SetFormatHTMLEmoticons(string message)
+        {
+            message = "http://www.iconsdb.com/icons/preview/white/message-xxl.png";            
+            
+            //Images
+            //message = Regex.Replace(message, @"((?:(?:https?:\/\/))[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b(?:[-a-zA-Z0-9@:%_\+.~#?&\/=]*(\.jpg|\.png|\.jpeg|\.gif)))$", "<img class='img-link' src='$1'/>");
+
+            //Format everything to Link:
+            message = Regex.Replace(message, @"(['])?([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b[-a-zA-Z0-9@:%_\+.~#?&//=]*)(['])?$", "<a href='$2'>$2<a/>");
+
+            //Format Emoticons
+            message = Emojione.ReplaceAllShortnamesWithHTML(message);
+
+            return message;
         }
     }
 }

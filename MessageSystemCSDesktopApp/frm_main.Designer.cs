@@ -101,7 +101,7 @@ namespace MessageSystemCSDesktopApp
             this.tb_ip.Name = "tb_ip";
             this.tb_ip.Size = new System.Drawing.Size(136, 20);
             this.tb_ip.TabIndex = 9;
-            this.tb_ip.Text = "192.168.164.129";
+            this.tb_ip.Text = "153.17.132.191";
             // 
             // label3
             // 

@@ -162,9 +162,10 @@ namespace MessageSystemCSDesktopApp
 
             ConversationTabPage userTab = TabExistsForUID(senderUID);
 
-            if (userTab != null) //Tab not exists
+            if (userTab != null) //Tab exists
             {
                 userTab.NewMessageFromOther(senderUID, timeStamp, message);
+
 
                 //if (TabIsActiveForUID(senderUID) == null) //Also nicht aktiv
                 //{                   
@@ -175,8 +176,8 @@ namespace MessageSystemCSDesktopApp
             {
                 tc_conversations.TabPages.Add(new ConversationTabPage(this, senderUID, GetPublicKeyForUID(senderUID)));
                 ConversationTabPage lastTP = (ConversationTabPage) tc_conversations.TabPages[tc_conversations.TabPages.Count - 1];
-
-                lastTP.NewMessageFromOther(senderUID, timeStamp, message);                
+                Application.DoEvents();
+                OnNewMessage(senderUID, timeStamp, message);                
                 //Blink
             }           
         }

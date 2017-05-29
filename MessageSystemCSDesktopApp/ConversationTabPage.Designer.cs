@@ -125,7 +125,7 @@ namespace MessageSystemCSDesktopApp
             this.ResumeLayout(false);
 
         }
-      
+        
         #endregion
 
         private Button btn_emoji;
