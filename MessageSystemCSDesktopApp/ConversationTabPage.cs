@@ -1,40 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using MessageSysDataManagementLib;
+using System;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using MessageSysDataManagementLib;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace MessageSystemCSDesktopApp
 {
-    public partial class ConversationTabPage : TabPage  /* UserControl */
+    public sealed partial class ConversationTabPage : TabPage  /* UserControl */
     {
-        private frm_main main;
-        private frm_emoji emoji = null;
+        private readonly frm_main _main;
+        private frm_emoji _emoji ;
 
-        private string _uid;
-        private string _publicKey;
-        private bool _disabled = false;
+        public string PublicKey { get; set; }
 
-        public string PublicKey { get => _publicKey; set => _publicKey = value; }
-        public string UID { get => _uid; set => _uid = value; }
-        public bool Disabled { get => _disabled; set => _disabled = value; }        
+        public string UID { get; set; }
+
+        public bool Disabled { get; set; }
 
         public ConversationTabPage(frm_main main, string uid, string publicKey)
         {
-            this.main = main;
-            _publicKey = publicKey;
-            _uid = uid;
+            _main = main;
+            PublicKey = publicKey;
+            UID = uid;
 
             InitializeComponent();
 
-            this.Name = uid;
-            this.Text = uid;
+            Name = uid;
+            Text = uid;
 
             SetDefaultHTML();
 
@@ -43,22 +35,22 @@ namespace MessageSystemCSDesktopApp
 
         private void conversationTapPage_GotFocus(object sender, EventArgs e)
         {
-            FlashWindow.Stop(main);
+            FlashWindow.Stop(_main);
         }
 
         private void tb_send_message_KeyUp(object sender, KeyEventArgs e)
         {
-            FlashWindow.Stop(main);
+            FlashWindow.Stop(_main);
 
             if (e.KeyCode == Keys.Enter && e.Shift)
             {
-                main.Log("Shift + Enter pressed.");
+                _main.Log("Shift + Enter pressed.");
             }
             else if (e.KeyCode == Keys.Enter && !e.Shift)
             {
-                main.Log("Only Enter pressed.");
+                _main.Log("Only Enter pressed.");
                 btn_send.PerformClick();                                
-                main.Log("Message sent.");
+                _main.Log("Message sent.");
             }
         }
 
@@ -66,8 +58,8 @@ namespace MessageSystemCSDesktopApp
         {
             if (!String.IsNullOrWhiteSpace(tb_send_message.Text) || !String.IsNullOrEmpty(tb_send_message.Text))
             {
-                main.Log(tb_send_message.Text);
-                main.SendMessage(this.UID, MessageSysDataManagementLib.KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray())));
+                _main.Log(tb_send_message.Text);
+                _main.SendMessage(UID, KeyManagement.Encrypt(this.PublicKey, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray())));
                 NewMessageFromMe(DateTime.Now, tb_send_message.Text.TrimEnd(Environment.NewLine.ToCharArray()));
                 tb_send_message.Clear();
             }
@@ -84,7 +76,7 @@ namespace MessageSystemCSDesktopApp
                 ShowSystemMessage(message);
             }
 
-            _disabled = true;
+            Disabled = true;
         }
 
         public void EnableAll(string message = "")
@@ -102,9 +94,12 @@ namespace MessageSystemCSDesktopApp
         private void ShowSystemMessage(string message)
         {
             //tb_receive_message.Text += message + "\n";
-            wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='system-message'>" + message + "</div>";
-            Application.DoEvents();
-            wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Body.ScrollRectangle.Height);            
+            if (wb_receive_message.Document != null)
+            {
+                wb_receive_message.Document.GetElementById("chat-history").InnerHtml += "<div class='system-message'>" + message + "</div>";
+                Application.DoEvents();
+                wb_receive_message.Document.Window.ScrollTo(0, wb_receive_message.Document.Body.ScrollRectangle.Height);
+            }
         }
 
         public void NewMessageFromMe(DateTime messageTimeStamp, string message)
@@ -225,26 +220,28 @@ namespace MessageSystemCSDesktopApp
 
         private void btn_emoji_Click(object sender, EventArgs e)
         {
-            if(emoji != null)
+            if(_emoji != null)
             {
-                emoji.Location = new Point(MousePosition.X, MousePosition.Y);
-                emoji.Show();
+                _emoji.Location = new Point(MousePosition.X, MousePosition.Y);
+                _emoji.Show();
             }
             else
             {
-                emoji = new frm_emoji(this);               
-                emoji.Location = new Point(MousePosition.X, MousePosition.Y);
-                emoji.Show();
+                _emoji = new frm_emoji(this)
+                {
+                    Location = new Point(MousePosition.X, MousePosition.Y)
+                };
+                _emoji.Show();
             }
         }
 
         private void wb_receive_message_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
-            if (e.Url.ToString() != "about:blank")
-            {
-                System.Diagnostics.Process.Start(e.Url.ToString());
-                e.Cancel = true;
-            }
+            if (e.Url.ToString() == "about:blank")
+                return;
+
+            System.Diagnostics.Process.Start(e.Url.ToString());
+            e.Cancel = true;
         }
 
         private string SetFormatHTMLEmoticons(string message)

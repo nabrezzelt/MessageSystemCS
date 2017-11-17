@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace MessageSystemCSDesktopApp
 {
-    partial class ConversationTabPage
+    sealed partial class ConversationTabPage
     {
         /// <summary> 
         /// Erforderliche Designervariable.

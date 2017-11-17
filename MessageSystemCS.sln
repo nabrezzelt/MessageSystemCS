@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageSystemCSServer", "MessageSystemCSServer\MessageSystemCSServer.csproj", "{11A67C4F-BF06-449F-8E3B-53E94DEA1C17}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageSystemCSDesktopApp", "MessageSystemCSDesktopApp\MessageSystemCSDesktopApp.csproj", "{96DCF441-3226-4493-AC22-DDC6AECDACB9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageSysDataManagementLib", "MessageSysDataManagementLib\MessageSysDataManagementLib.csproj", "{604E8022-2EBA-414E-A2C6-29BAC1EC3565}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageSystemCSDesktopAppWPF", "MessageSystemCSDesktopAppWPF\MessageSystemCSDesktopAppWPF.csproj", "{E22D1D60-3FF1-4462-9C35-256A4EC42312}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,8 +29,15 @@ Global
 		{604E8022-2EBA-414E-A2C6-29BAC1EC3565}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{604E8022-2EBA-414E-A2C6-29BAC1EC3565}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{604E8022-2EBA-414E-A2C6-29BAC1EC3565}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E22D1D60-3FF1-4462-9C35-256A4EC42312}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E22D1D60-3FF1-4462-9C35-256A4EC42312}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E22D1D60-3FF1-4462-9C35-256A4EC42312}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E22D1D60-3FF1-4462-9C35-256A4EC42312}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DD547523-0108-4C73-9C2B-585112450C3E}
 	EndGlobalSection
 EndGlobal
