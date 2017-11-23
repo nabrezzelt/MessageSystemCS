@@ -1,9 +1,8 @@
-﻿<Window x:Class="MessageSystem_CS___WPF.MainWindow"
+﻿<Window x:Class="MessageSystemCSDesktopAppWPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MessageSystem_CS___WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="715.121" Width="1003.511"
         Icon="images/message.ico"
@@ -23,7 +22,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="75" />
+            <RowDefinition Height="87" />
         </Grid.RowDefinitions>
         <TabControl Grid.Column="0" Background="{DynamicResource MaterialDesignPaper}" TabStripPlacement="Left">
             <TabControl.Resources>
@@ -43,26 +42,52 @@
                     </Setter>
                 </Style>
             </TabControl.Resources>
-            <TabItem>
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <ScrollViewer HorizontalScrollBarVisibility="Hidden"  VerticalScrollBarVisibility="Auto" >
+                            <TabPanel x:Name="HeaderPanel"
+                                      Panel.ZIndex ="1" 
+                                      KeyboardNavigation.TabIndex="1"
+                                      Margin="2,2,2,0"
+                                      IsItemsHost="true"/>
+                        </ScrollViewer>
+                        <ContentPresenter Grid.Column="1" x:Name="PART_SelectedContentHost"
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                      Margin="{TemplateBinding Padding}"
+                                      ContentSource="SelectedContent" />
+                    </Grid>
+                </ControlTemplate>
+            </TabControl.Template>
+            <TabItem ToolTip="Private Chats">
                 <TabItem.Header>
                     <materialDesign:Badged Badge="3"
                                            BadgeColorZoneMode="Accent">
                         <ToggleButton Background="#FF464646"
-                            Style="{StaticResource MaterialDesignActionToggleButton}"
-                            ToolTip="MaterialDesignActionToggleButton">
+                                      Style="{DynamicResource MaterialDesignActionToggleButton}"
+                                      ToolTip="MaterialDesignActionToggleButton">
                             <materialDesign:PackIcon Kind="AccountMultiple"></materialDesign:PackIcon>
                         </ToggleButton>
                     </materialDesign:Badged>
-                    
+
+                </TabItem.Header>
+            </TabItem>
+            <TabItem IsEnabled="False" IsHitTestVisible="False">
+                <TabItem.Header>
+                    <Separator Margin="0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="25" Background="Gray" />
                 </TabItem.Header>
             </TabItem>
             <TabItem>
                 <TabItem.Header>
                     <materialDesign:Badged 
-                                           BadgeColorZoneMode="Accent">
+                        BadgeColorZoneMode="Accent">
                         <ToggleButton Background="Transparent"
-                            Style="{StaticResource MaterialDesignActionToggleButton}"
-                            ToolTip="MaterialDesignActionToggleButton">
+                                      Style="{DynamicResource MaterialDesignActionToggleButton}"
+                                      ToolTip="MaterialDesignActionToggleButton">
                             <Image Source="https://avatars2.githubusercontent.com/u/32138569?s=48" />
                         </ToggleButton>
                     </materialDesign:Badged>
@@ -74,55 +99,96 @@
                     <materialDesign:Badged Badge="6"
                                            BadgeColorZoneMode="Accent">
                         <ToggleButton Background="Transparent"
-                             Style="{StaticResource MaterialDesignActionToggleButton}"
-                             ToolTip="MaterialDesignActionToggleButton">
+                                      Style="{DynamicResource MaterialDesignActionToggleButton}"
+                                      ToolTip="MaterialDesignActionToggleButton">
                             <Image Source="https://avatars1.githubusercontent.com/u/21213524?s=48" />
                         </ToggleButton>
                     </materialDesign:Badged>
 
                 </TabItem.Header>
             </TabItem>
+            <TabItem IsEnabled="False" IsHitTestVisible="False">
+                <TabItem.Header>
+                    <Separator Margin="0" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Width="25" Background="Gray" />
+                </TabItem.Header>
+            </TabItem>
             <TabItem>
                 <TabItem.Header>
                     <materialDesign:Badged BadgeColorZoneMode="Accent">
                         <ToggleButton Background="#FF464646"
-                            Style="{StaticResource MaterialDesignActionToggleButton}"
-                            ToolTip="MaterialDesignActionToggleButton">
+                                      Style="{DynamicResource MaterialDesignActionToggleButton}"
+                                      ToolTip="MaterialDesignActionToggleButton">
                             <materialDesign:PackIcon Kind="Plus"></materialDesign:PackIcon>
                         </ToggleButton>
                     </materialDesign:Badged>
-
                 </TabItem.Header>
             </TabItem>
         </TabControl>
         <Grid Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="57" />
+                <ColumnDefinition Width="77" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="200" />
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBox  Margin="5"
-                         Style="{DynamicResource MaterialDesignTextAreaTextBox}"
-                         VerticalAlignment="Top" AcceptsReturn="True" Height="65" 
-                         TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" 
-                         materialDesign:HintAssist.Hint="Your Message" />
-                <materialDesign:PopupBox
-                    Grid.Column="1" PlacementMode="BottomAndAlignRightEdges"
-                    StaysOpen="False"                    >
-                    <StackPanel >
-                        <Button Content="Hello World" />
-                        <Button Content="Nice Popup" />
-                        <Button Content="Can't Touch This" IsEnabled="False" />
-                        <Separator />
-                        <Button Content="Goodbye" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <materialDesign:PopupBox 
+                    Grid.Row="1"
+                    PlacementMode="TopAndAlignCentres"
+                    StaysOpen="False">
+                    <StackPanel>
+                        <Button>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Camera" />
+                                <TextBlock Margin="5,0,0,0">Send a screenshot</TextBlock>
+                            </StackPanel>
+                        </Button>
+                        <Button>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Attachment" />
+                                <TextBlock Margin="5,0,0,0">Send a file</TextBlock>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
+                    <materialDesign:PopupBox.ToggleContent>
+                        <materialDesign:PackIcon Kind="PlusCircle" Height="24" Width="24" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="4"/>
+                    </materialDesign:PopupBox.ToggleContent>
+                </materialDesign:PopupBox>
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="Nabrezzelt is typing..." Style="{DynamicResource MaterialDesignCaptionTextBlock}" IsEnabled="False" Margin="6,0,0,0"/>
+                <TextBox  Margin="5" Grid.Column="1" Grid.Row="1"
+                          Style="{DynamicResource MaterialDesignTextAreaTextBox}"
+                          VerticalAlignment="Top" AcceptsReturn="True"  
+                          TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" 
+                          materialDesign:HintAssist.Hint="Your Message" Height="62" />
+                <materialDesign:PopupBox 
+                    Grid.Row="1"
+                    Grid.Column="2" PlacementMode="TopAndAlignCentres"
+                    StaysOpen="False">
+                    <WrapPanel>
+                        
+                    </WrapPanel>
+                    <materialDesign:PopupBox.ToggleContent>
+                        <materialDesign:PackIcon Kind="EmoticonTongue" Height="24" Width="24" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="4"/>
+                    </materialDesign:PopupBox.ToggleContent>
                 </materialDesign:PopupBox>
             </Grid>
+            <materialDesign:Chip Grid.Column="2"	                        
+                                 Margin="4,4,24,4"	                        
+                                 Content="Nabrezzelt"	                        
+                                 DeleteToolTip="Logout"
+                                 IsDeletable="True" HorizontalContentAlignment="Center" HorizontalAlignment="Right">
+                <materialDesign:Chip.Icon>
+                    <Image  Source="https://avatars1.githubusercontent.com/u/21213524?s=48" />
+                </materialDesign:Chip.Icon>
+            </materialDesign:Chip>
         </Grid>
     </Grid>
 </Window>
